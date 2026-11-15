@@ -12,6 +12,7 @@
 	<table border="1">
 	<tr>
 		<th>№</th>
+		<th>Направление</th>
 		<th>Мероприятие</th>
 		<th>Свободные места</th>
 		<th>Статус</th>
@@ -21,6 +22,7 @@
 	{% for event in events %}
 	<tr>
 		<td>{{ event["id"] }}</td>
+		<td>{{ event["direction"] }}</td>
 		<td>{{ event["title"] }}</td>
 		<td>{{ event["seats"] }}</td>
 		<td>{{ event["status"] }}</td>
