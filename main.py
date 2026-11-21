@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
@@ -41,6 +41,22 @@ class Event(BaseModel):
 def index_GET(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context={"events": EVENTS})
 
+@app.get("/events/new", response_class=HTMLResponse)
+def form_GET(request: Request):
+    return templates.TemplateResponse(request=request, name="form.html")
+
+@app.post("/events/new")
+def form_POST(title: str = Form(), seats: int = Form(), direction: str = Form()):
+    new_event = {"id": len(EVENTS) + 1,
+                 "direstion": direction,
+                 "title": title,
+                 "seats": seats,
+                 "status": "Регистрация"}
+    if seats == 0:
+        new_event["status"] = "Регистрация закрыта"
+    EVENTS.append(new_event)
+    return RedirectResponse(url="/", status_code=303)
+
 @app.get("/api/events", response_model=list[Event])
 def events_GET():
     return EVENTS
@@ -48,5 +64,3 @@ def events_GET():
 @app.get("/api/events/open", response_model=list[Event])
 def open_GET():
     return [event for event in EVENTS if event['status'] == "Регистрация"]
-        
-
