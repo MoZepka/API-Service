@@ -37,6 +37,11 @@ class Event(BaseModel):
     seats: int
     status: str
 
+class EventCreate(BaseModel):
+    direction: str
+    title: str
+    seats: int
+
 @app.get("/", response_class=HTMLResponse)
 def index_GET(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context={"events": EVENTS})
@@ -53,13 +58,24 @@ def form_POST(title: str = Form(), seats: int = Form(), direction: str = Form())
                  "seats": seats,
                  "status": "Регистрация"}
     if seats == 0:
-        new_event["status"] = "Регистрация закрыта"
+        new_event["status"] = "Выполнение"
     EVENTS.append(new_event)
     return RedirectResponse(url="/", status_code=303)
 
-@app.get("/api/events", response_model=list[Event])
+@app.get("/api/events")
 def events_GET():
     return EVENTS
+
+@app.post("/api/events", response_model=EventCreate, status_code=201)
+def events_POST(event: EventCreate):
+    new_event = event.model_dump()
+    new_event["id"] = len(EVENTS) + 1
+    if new_event["seats"] == 0:
+        new_event["status"] = "Выполнение"
+    else:
+        new_event["status"] = "Регистрация"
+    EVENTS.append(new_event)
+    return new_event
 
 @app.get("/api/events/open", response_model=list[Event])
 def open_GET():
