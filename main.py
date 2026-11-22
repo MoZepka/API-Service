@@ -12,21 +12,21 @@ EVENTS = [
     "direction": "Космическая миссия",
     "title": "Artemis II: Облет Луны",
     "seats": 8,
-    "status": "Регистрация"
+    "status": "Открыта"
   },
   {
     "id": 2,
     "direction": "Дистанционное управление",
     "title": "ExoMars: Поиск жизни",
     "seats": 2,
-    "status": "Выполнение"
+    "status": "Открыта"
   },
   {
     "id": 3,
     "direction": "Космическая миссия",
     "title": "SpaceX: Crew-9",
     "seats": 0,
-    "status": "Завершен"
+    "status": "Регистрация завершена"
   }
 ]
 
@@ -53,12 +53,12 @@ def form_GET(request: Request):
 @app.post("/events/new")
 def form_POST(title: str = Form(), seats: int = Form(), direction: str = Form()):
     new_event = {"id": len(EVENTS) + 1,
-                 "direstion": direction,
+                 "direction": direction,
                  "title": title,
                  "seats": seats,
-                 "status": "Регистрация"}
+                 "status": "Открыта"}
     if seats == 0:
-        new_event["status"] = "Выполнение"
+        new_event["status"] = "Регистрация завершена"
     EVENTS.append(new_event)
     return RedirectResponse(url="/", status_code=303)
 
@@ -66,17 +66,17 @@ def form_POST(title: str = Form(), seats: int = Form(), direction: str = Form())
 def events_GET():
     return EVENTS
 
-@app.post("/api/events", response_model=EventCreate, status_code=201)
+@app.post("/api/events", response_model=Event, status_code=201)
 def events_POST(event: EventCreate):
     new_event = event.model_dump()
     new_event["id"] = len(EVENTS) + 1
     if new_event["seats"] == 0:
-        new_event["status"] = "Выполнение"
+        new_event["status"] = "Регистрация завершена"
     else:
-        new_event["status"] = "Регистрация"
+        new_event["status"] = "Открыта"
     EVENTS.append(new_event)
     return new_event
 
 @app.get("/api/events/open", response_model=list[Event])
 def open_GET():
-    return [event for event in EVENTS if event['status'] == "Регистрация"]
+    return [event for event in EVENTS if event['status'] == "Открыта"]
